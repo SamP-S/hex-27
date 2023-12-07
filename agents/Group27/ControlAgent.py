@@ -2,6 +2,7 @@ import socket
 from random import choice
 from time import sleep
 from AlphaBeta import AlphaBeta
+from Resistance import Resistance
 
 class ControlAgent():
     """This class describes the default Hex agent. It will randomly send a
@@ -23,6 +24,7 @@ class ControlAgent():
         self.colour = ""
         self.turn_count = 0
         self.ab = AlphaBeta(board_size)
+        self.resistance = Resistance(board_size)
 
     def run(self):
         """Reads data until it receives an END message or the socket closes."""
@@ -52,10 +54,12 @@ class ControlAgent():
                     self.make_move()
 
             elif s[0] == "END":
+                print(s)
                 return True
 
             elif s[0] == "CHANGE":
                 if s[3] == "END":
+                    print(s)
                     return True
 
                 elif s[1] == "SWAP":
@@ -79,8 +83,13 @@ class ControlAgent():
         if self.colour == "B" and self.turn_count == 0 and choice([0, 1]) == 1:
             self.s.sendall(bytes("SWAP\n", "utf-8"))
         else:
-
-            move = self.ab.make_move(self.board, self.colour, 2)
+            # if close to finishing
+            # use alpha beta to get guaranteed win
+            if (self.turn_count > 60):
+                move = self.ab.make_move(self.board, self.colour, 3)
+            else:
+                move = self.resistance.make_move(self.board, self.colour)
+            
 
             # send move
             self.s.sendall(bytes(f"{move[0]},{move[1]}\n", "utf-8"))

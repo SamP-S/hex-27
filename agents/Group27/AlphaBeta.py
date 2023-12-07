@@ -74,22 +74,16 @@ class AlphaBeta():
             Blue left->right
             Return 1 for Red win, -1 for Blue win, 0 for no winner """
 
-        # start_time = perf_counter()
         # iterate over top row to start dfs search
         for i in range(self._board_size):
             front, back = self.dfs(deepcopy(board), "R", i, 0, False, False)
             if board[i][0] == 'R' and front and back:
-                # print(f"AB WIN RED ({i},{0})")
-                # print(f"check_win time: {perf_counter() - start_time}")
                 return 1
         #  iterate over left column to start dfs search
         for j in range(self._board_size):
             front, back = self.dfs(deepcopy(board), "B", 0, j, False, False)
             if board[0][j] == 'B' and front and back:
-                # print(f"AB WIN BLUE ({0},{j})")
-                # print(f"check_win time: {perf_counter() - start_time}")
                 return -1
-        # print(f"check_win time: {perf_counter() - start_time}")
         return 0
 
     def alpha_beta(self, board, choices, player, depth, alpha=-1000.0, beta=1000.0):
@@ -151,5 +145,4 @@ class AlphaBeta():
 
 
 if (__name__ == "__main__"):
-    agent = WolveAgent()
-    agent.run()
+    print("AlphaBeta.py has no main")

@@ -27,3 +27,6 @@ class Coordinates():
                 if (board[i][j]) == "0":
                     coords.append((i, j))
         return coords
+
+if __name__ == "__main__":
+    print("BoardSupport.py has no main")
