@@ -1,0 +1,15 @@
+https://github.com/kenjyoung/Neurohex  neurohex q-learning
+https://github.com/ryanbhayward/hexgui  hexgui for testing
+https://arxiv.org/pdf/1604.07097.pdf    neurohex paper
+http://vanshel.com/Hexy/Publications/VAnshelevich-ARTINT.pdf    anshelevich resistance
+https://github.com/cgao3/benzene-vanilla-cmake  benzene mohex 2.0 & wolve
+https://github.com/cgao3/neurobenzene   benzene mohex 3.0
+
+alpha beta pruning minmax
+depth 3
+121     121
+120     14,520
+119     1,727,880
+
+issue with data collecting sometimes having 2 commands in 1 data read
+need to split at newline to fix
