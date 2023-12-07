@@ -61,7 +61,7 @@ class ElectroAgent():
             self._board_size = int(data[1])
             self._board = np.full((self._board_size, self._board_size), "0") 
             self._colour = data[2]
-            count, self._choices = self.get_empty(self._board)
+            self._choices = self.get_empty(self._board)
             print(f"wait_start_data: {data}")
             if (self._colour == "R"):
                 return 3
@@ -304,7 +304,7 @@ class ElectroAgent():
     def score(self, board, player):
         # Q is dictionary
         Q = {}
-        num_empty, empty = self.get_empty(board)
+        empty = self.get_empty(board)
         #filled_fraction = (boardsize**2-num_empty+1)/boardsize**2
 
         # main matrices to calculate
@@ -319,7 +319,7 @@ class ElectroAgent():
         # print(f"I1={I1.shape}; C1={C1}")
         # print(f"I2={I2.shape}; C2={C2}")
 
-        num_empty, empty = self.get_empty(board)
+        empty = self.get_empty(board)
         for i, cell in enumerate(empty):
 
             # # THIS IS AN APPROXIMATION OF THE CURRENT OF THE
