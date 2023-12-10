@@ -1,5 +1,6 @@
 from Tile import Tile
 from Colour import Colour
+from colorama import Fore, Back, Style
 
 
 class Board:
@@ -125,7 +126,10 @@ class Board:
                 output += leading_spaces
                 leading_spaces += " "
                 for tile in line:
-                    output += Colour.get_char(tile.get_colour()) + " "
+                    colour = tile.get_colour()
+                    output += Fore.WHITE
+                    output += (Back.RED if colour == Colour.RED else (Back.BLUE if colour == Colour.BLUE else Back.WHITE)) 
+                    output += " " + Style.RESET_ALL + " "
                 output += "\n"
 
         return output
