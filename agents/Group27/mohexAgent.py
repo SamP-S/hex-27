@@ -29,7 +29,7 @@ class mohexAgent():
 
     def _start_subprocess(self):
         # Replace 'your_c_agent_executable' with the actual path to your C agent executable
-        self._process = subprocess.Popen(["./agents/Group27/mohex"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,  
+        self._process = subprocess.Popen(["./agents/Group27/mohex/mohex"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,  
                                          stderr=subprocess.DEVNULL, 
                                          text=True)
         time.sleep(1)
