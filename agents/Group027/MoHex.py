@@ -3,6 +3,7 @@ import time
 import select
 
 class MoHex():
+    """Class for playing Hex using the MoHex engine."""
 
     def __init__(self, board_size=11, eval_func=1):
         self.mohex_colour_map = {'R': 'Bl', 'Bl': 'R', 'B': 'W', 'W': 'B'}
@@ -10,10 +11,12 @@ class MoHex():
         self._start_subprocess()
     
     def _start_subprocess(self):
-        self._process = subprocess.Popen(["./agents/Group27/mohex/mohex"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,  
+        self._process = subprocess.Popen(["./agents/Group027/mohex/mohex"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,  
                                          stderr=subprocess.DEVNULL, 
                                          text=True)
+        # Wait for the subprocess to start
         time.sleep(1)
+        # send inital commands & parameters to mohex
         self._send_mohex_command("boardsize 11 11")
         response = self._read_mohex_response()
         self._send_mohex_command("param_mohex num_threads 24")
@@ -24,12 +27,10 @@ class MoHex():
         response = self._read_mohex_response()
         self._send_mohex_command("param_mohex ponder 0")
         response = self._read_mohex_response()
-        #print("Game start")
     
     def _terminate_subprocess(self):
         # Terminate the subprocess when the agent is closed
         self._process.terminate()
-        #print("Victory!")
     
     def _close(self):
         # Terminate the subprocess
@@ -51,14 +52,13 @@ class MoHex():
     
     def _send_mohex_command(self, command):
         if self._process.poll() is None:  # Check if the process is still running
-            self._process.stdin.write(command + '\n')
+            self._process.stdin.write(command + '\n') # Send command to mohex
             self._process.stdin.flush()
         else:
             raise Exception("Cannot send command: The process has terminated")
-        #print(f"Command sent: {command}")
 
     def _read_mohex_response(self, timeout=15.0):
-        response = 'timeout'
+        response = 'timeout' # Default response if we time out
         end_time = time.time() + timeout
         while time.time() < end_time:
             ready, _, _ = select.select([self._process.stdout], [], [], end_time - time.time())
@@ -68,16 +68,15 @@ class MoHex():
                     continue  # Skip empty or incomplete lines
                 response = output
                 break
-        #print(f"RESPONSE: {response}")
         return response
     
-    def mohex_to_hex_board(self, val1, val2):
-        firstval = int(val2)-1
+    def mohex_to_hex_board(self, val1, val2): # Convert mohex positions to board positions
+        firstval = int(val2)-1 # Mohex is column indexed
         secondval = ord(val1)-ord('a')
         return firstval, secondval
     
-    def hex_to_mohex_board(self, val1, val2):
-        firstval = chr(ord('a') + int(val2))
+    def hex_to_mohex_board(self, val1, val2): # Convert board positions to mohex positions
+        firstval = chr(ord('a') + int(val2)) # Board is row indexed
         secondval = val1+1
         return firstval, secondval
     
@@ -99,23 +98,18 @@ class MoHex():
             response = self._read_mohex_response()
             if response == 'timeout':
                 return False
-            #print(f"DEBUG: Opponent move: {opp_move}")
         
         # Then we need to generate our move
         mohex_colour = self.mohex_colour_map[colour][0]
         self._send_mohex_command(f"genmove {mohex_colour}")
         response = self._read_mohex_response()
-        # print("Response: ", response)
         if response == 'timeout':
-            # print("Timeout")
             return False
-            # sys.exit()#############################
         
         # Send move to server
-        # print(f"RESPONSE: {response}")
         move = self.separate_letter_and_number(response)
         move = self.mohex_to_hex_board(move[0], move[1])
         return move
 
 if (__name__ == "__main__"):
-    print("MoHex.py has no main")
+    pass

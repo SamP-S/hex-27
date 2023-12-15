@@ -1,7 +1,7 @@
 from random import choice
 
 class Dijkstra():
-    
+    """Dijkstra's algorithm for finding the shortest path across the board."""
     def make_path(self, board, colour):
         # opp_colour = "B" if colour == "R" else "R"
         prev, dist, path = self.pathfind(board, colour)
@@ -9,7 +9,7 @@ class Dijkstra():
     
     def pathfind(self, board, colour):
         start = (-1, 0) if colour == "B" else (0, -1)
-        end   = (11, 0) if colour == "B" else (0, 11) # TODO: use board size
+        end   = (11, 0) if colour == "B" else (0, 11) 
 
         dist = { start: 0 }
         prev = {}
