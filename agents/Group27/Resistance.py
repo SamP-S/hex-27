@@ -274,8 +274,33 @@ class Resistance():
 
 if (__name__ == "__main__"):
     print("Resistance Testing")
-    board_size = 11
+    
+    def opp_player(p):
+        return "B" if p == "R" else "R"
+
+    def print_board(b):
+        for j, row in enumerate(b):
+            print(" "*j, end="")
+            print(" ".join(row))
+
+    board_size = 5
+    player = "R"
     r = Resistance(board_size)
-    board = [["0"]*board_size for i in range(board_size)]
+    board = BoardSupport.create_board(board_size)
     empty = BoardSupport.get_empty(board)
-    r.resistance(board, "R")
+    r.resistance(board, player)
+
+    while True:
+        conductivity = r.score(deepcopy(board), player)
+        move = np.unravel_index(conductivity.argmax(), conductivity.shape)
+        print(f"move={move}; value={conductivity[move[0]][move[1]]}")
+        board[move[0]][move[1]] = player
+
+        print("Board")
+        print_board(board)
+        print("Outputs")
+        print(conductivity)
+        input()
+
+        player = opp_player(player)
+
