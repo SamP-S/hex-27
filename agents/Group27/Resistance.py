@@ -300,7 +300,7 @@ if (__name__ == "__main__"):
         print_board(board)
         print("Outputs")
         print(conductivity)
-        input()
+        input("Press Enter...")
 
         player = opp_player(player)
 
