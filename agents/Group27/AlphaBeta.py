@@ -17,7 +17,8 @@ class AlphaBeta():
         elif eval_func == 1:
             self.evaluate_board = self.random_board_evaluation
         else:
-            print("ERROR: NO EVAL FUNCTION")
+            #print("ERROR: NO EVAL FUNCTION")
+            pass
 
 
     def make_move(self, board, player, depth=2):
@@ -30,7 +31,7 @@ class AlphaBeta():
         choices = BoardSupport.get_empty(board)
         val, move = self.alpha_beta(deepcopy(board), choices, player, depth)
 
-        print(f"ab finish: val={val}; move={move}; nodes={self.node_count} time={perf_counter() - start_time}")
+        #print(f"ab finish: val={val}; move={move}; nodes={self.node_count} time={perf_counter() - start_time}")
 
         return move
 
