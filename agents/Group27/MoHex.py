@@ -22,6 +22,7 @@ class MoHex():
         response = self._read_mohex_response()
         self._send_mohex_command("param_mohex lock_free 1")
         response = self._read_mohex_response()
+        self._send_mohex_command("param_mohex ponder 0")
         #print("Game start")
     
     def _terminate_subprocess(self):
