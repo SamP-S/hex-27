@@ -1,0 +1,62 @@
+Copy Time: 0.00003534
+Selection Time: 0.00007375
+Expansion Time: 0.00005217
+Selection2 Time: 0.00003827
+Simulation Time: 0.00088316
+Simulation Time: 0.00000866
+
+Copy Time: 0.00003478
+Selection Time: 0.00007445
+Expansion Time: 0.00005064
+Selection2 Time: 0.00003806
+Simulation Time: 0.00022091
+Simulation Time: 0.00000810
+
+Copy Time: 0.00003478
+Selection Time: 0.00007976
+Expansion Time: 0.00004910
+Selection2 Time: 0.00003771
+Simulation Time: 0.00086130
+Simulation Time: 0.00001208
+
+Copy Time: 0.00003576
+Selection Time: 0.00007473
+Expansion Time: 0.00005364
+Selection2 Time: 0.00004009
+Simulation Time: 0.00043421
+Simulation Time: 0.00000901
+
+Copy Time: 0.00003506
+Selection Time: 0.00007054
+Expansion Time: 0.00004721
+Selection2 Time: 0.00003869
+Simulation Time: 0.00055057
+Simulation Time: 0.00000838
+
+Copy Time:       0.00003667
+Selection Time:  0.00007012
+Expansion Time:  0.00005434
+Selection2 Time: 0.00004205
+Simulation Time: 0.00055294
+Simulation Time: 0.00000887
+
+Copy Time: 0.00003464
+Selection Time:  0.00007047
+Expansion Time:  0.00004903
+Selection2 Time: 0.00004002
+Simulation Time: 0.00018396
+Simulation Time: 0.00001048
+
+Copy Time: 0.00003716
+Selection Time: 0.00007243
+Expansion Time: 0.00004882
+Selection2 Time: 0.00003834
+Simulation Time: 0.00021595
+Simulation Time: 0.00000894
+
+Copy Time: 0.00003597
+Selection Time: 0.00007201
+Expansion Time: 0.00004959
+Selection2 Time: 0.00003862
+Simulation Time: 0.00018711
+Simulation Time: 0.00000901

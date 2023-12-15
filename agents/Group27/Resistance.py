@@ -114,7 +114,7 @@ class Resistance():
                 elif board[coord[0]][coord[1]] == "R":
                     source_connected = source_connected | self.fill_connect(board, coord, player, checked)
         
-        with open("shit.txt", "w") as f:
+        with open("./docs/kirchhoff.txt", "w") as f:
             f.write("source_connected:\n")
             # print(f"source_connected={source_connected}")
             for n in source_connected:

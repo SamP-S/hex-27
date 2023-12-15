@@ -1,0 +1,125 @@
+Copy Time: 0.00006300
+Selection Time: 0.00007878
+Expansion Time: 0.00077350
+Selection2 Time: 0.00004065
+Simulation Time: 0.00066141
+Simulation Time: 0.00000810
+
+Copy Time: 0.00003485
+Selection Time: 0.00007284
+Expansion Time: 0.00074927
+Selection2 Time: 0.00004051
+Simulation Time: 0.00052577
+Simulation Time: 0.00000747
+
+Copy Time: 0.00003471
+Selection Time: 0.00007166
+Expansion Time: 0.00075730
+Selection2 Time: 0.00004107
+Simulation Time: 0.00042541
+Simulation Time: 0.00000852
+
+Copy Time: 0.00003534
+Selection Time: 0.00007494
+Expansion Time: 0.00075898
+Selection2 Time: 0.00004156
+Simulation Time: 0.00068194
+Simulation Time: 0.00000859
+
+Copy Time: 0.00003632
+Selection Time: 0.00007096
+Expansion Time: 0.00075066
+Selection2 Time: 0.00004023
+Simulation Time: 0.00033042
+Simulation Time: 0.00000803
+
+Copy Time: 0.00003555
+Selection Time: 0.00007068
+Expansion Time: 0.00072580
+Selection2 Time: 0.00003967
+Simulation Time: 0.00020184
+Simulation Time: 0.00000803
+
+Copy Time: 0.00003730
+Selection Time: 0.00007103
+Expansion Time: 0.00076924
+Selection2 Time: 0.00004197
+Simulation Time: 0.00119535
+Simulation Time: 0.00000915
+
+Copy Time: 0.00003527
+Selection Time: 0.00007250
+Expansion Time: 0.00073111
+Selection2 Time: 0.00004309
+Simulation Time: 0.00066350
+Simulation Time: 0.00000866
+
+Copy Time: 0.00005329
+Selection Time: 0.00007340
+Expansion Time: 0.00072881
+Selection2 Time: 0.00004002
+Simulation Time: 0.00045942
+Simulation Time: 0.00000859
+
+Copy Time: 0.00003527
+Selection Time: 0.00007431
+Expansion Time: 0.00073788
+Selection2 Time: 0.00003953
+Simulation Time: 0.00058214
+Simulation Time: 0.00000999
+
+Copy Time: 0.00003569
+Selection Time: 0.00007347
+Expansion Time: 0.00080347
+Selection2 Time: 0.00003953
+Simulation Time: 0.00096306
+Simulation Time: 0.00001034
+
+Copy Time: 0.00004107
+Selection Time: 0.00007096
+Expansion Time: 0.00073118
+Selection2 Time: 0.00004002
+Simulation Time: 0.00051551
+Simulation Time: 0.00000768
+
+Copy Time: 0.00003618
+Selection Time: 0.00007236
+Expansion Time: 0.00080291
+Selection2 Time: 0.00006670
+Simulation Time: 0.00069500
+Simulation Time: 0.00001376
+
+Copy Time: 0.00003751
+Selection Time: 0.00009673
+Expansion Time: 0.00081939
+Selection2 Time: 0.00004624
+Simulation Time: 0.00070206
+Simulation Time: 0.00000999
+
+Copy Time:       0.00003827
+Selection Time:  0.00009617
+Expansion Time:  0.00078643
+Selection2 Time: 0.00004896
+Simulation Time: 0.00061629
+Simulation Time: 0.00001523
+
+Copy Time:       0.00003960
+Selection Time:  0.00009568
+Expansion Time:  0.00077246
+Selection2 Time: 0.00004086
+Simulation Time: 0.00065861
+Simulation Time: 0.00001048
+
+Copy Time: 0.00003436
+Selection Time: 0.00008877
+Expansion Time: 0.00077693
+Selection2 Time: 0.00004009
+Simulation Time: 0.00031345
+Simulation Time: 0.00000901
+
+Copy Time: 0.00004197
+Selection Time: 0.00008933
+Expansion Time: 0.00077756
+Selection2 Time: 0.00004519
+Simulation Time: 0.00032861
+Simulation Time: 0.00001096

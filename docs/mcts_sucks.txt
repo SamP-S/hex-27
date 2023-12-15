@@ -1,0 +1,13 @@
+initial implementation did about 50 iterations
+super slow and was basically random
+hugged the top
+was weighted top left due to most early search moves having equal visits and weighting
+
+improved speed by replacing recursive simulation with shuffled move list and iterating to fill the board
+increased to 2000 iterations
+
+still wasnt doing the best
+optimised it by identifying the win checking taking too long
+ran simple static analysis on all board rows to check if one is empty and could then skip the dfs
+works until the board starts getting filled
+

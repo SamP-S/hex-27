@@ -25,7 +25,7 @@ agent_names=(   "Bob"
             )
 
 echo "Total Agents = ${#agents[@]}"
-echo -n > tournament.txt
+echo -n > ./docs/tournament.txt
 
 for ((j = 0; j < agent_count; j++)); do
 
@@ -54,11 +54,11 @@ for ((j = 0; j < agent_count; j++)); do
     echo "$second_win / $itr"
     echo ""
 
-    echo "Electro vs $agent_name" >> tournament.txt
-    echo "$first_win / $itr" >> tournament.txt
-    echo "$agent_name vs Electro" >> tournament.txt
-    echo "$second_win / $itr" >> tournament.txt
-    echo "" >> tournament.txt
+    echo "Electro vs $agent_name" >> ./docs/tournament.txt
+    echo "$first_win / $itr" >> ./docs/tournament.txt
+    echo "$agent_name vs Electro" >> ./docs/tournament.txt
+    echo "$second_win / $itr" >> ./docs/tournament.txt
+    echo "" >> ./docs/tournament.txt
 
 done
 
