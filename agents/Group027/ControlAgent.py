@@ -1,6 +1,6 @@
 import socket
 from random import choice
-from time import sleep
+from time import sleep, perf_counter
 from AlphaBeta import AlphaBeta
 from Resistance import Resistance
 from BoardSupport import BoardSupport
@@ -41,6 +41,7 @@ class ControlAgent():
         self.board = []
         self.colour = ""
         self.turn_count = 0
+        self.turn_time = 0
         self.ab = AlphaBeta(board_size)
         self.resistance = Resistance(board_size)
         self.mcts = MCTS(board_size)
@@ -64,7 +65,6 @@ class ControlAgent():
 
         messages = data.decode("utf-8").strip().split("\n")
         messages = [x.split(";") for x in messages]
-        # print(messages)
         for s in messages:
             if s[0] == "START":
                 self.board_size = int(s[1])
@@ -75,12 +75,10 @@ class ControlAgent():
                     self.make_move(None, True)
 
             elif s[0] == "END":
-                #print(s)
                 return True
 
             elif s[0] == "CHANGE":
                 if s[3] == "END":
-                    #print(s)
                     return True
 
                 elif s[1] == "SWAP":
@@ -116,17 +114,19 @@ class ControlAgent():
                         if self.OPENING_WEIGHTS[x][y] > 0.7:
                             move_options.append((x, y))
                 move = choice(move_options)
-                #print(move_options)
+
         if use_ai_move:
             # If need to generate AI move (eg. it is not the first move)
-
+            start_time = perf_counter()
             # Get shortest path across board to win
             dijkstra_path = self.dijkstra.make_path(self.board, self.colour)
 
             # If one move away from winning then play that move
             if len(dijkstra_path) == 1:
                 move = dijkstra_path[0]
-                #print("DIJKSTRA - FINAL MOVE", move)
+            # if we are running out of time or moves use MCTS at 3s
+            elif (self.turn_count > 60 or self.turn_time > 200):
+                move = self.mcts.make_move(self.board, self.colour, max_time=3)
             else:
                 # Else use mohex
                 try:
@@ -134,18 +134,18 @@ class ControlAgent():
                 except:
                     # If mohex crashes then use Dijkstra
                     move = False
+
+                # if mohex crashes
                 if move == False:
-                    # print("MOHEX CRASHED############################################")
-                    #input()
-                    move = self.mcts.make_move(self.board, self.colour, max_time=5)
-                    # move = choice(dijkstra_path)
-                    #print("DIJKSTRA", move)
+                    # if close to winning then play dijkstra path
+                    if (len(dijkstra_path) <= 3):
+                        move = choice(dijkstra_path)
+                    # otherwise try mcts at 5s
+                    else:
+                        move = self.mcts.make_move(self.board, self.colour, max_time=5)
 
-            # if (self.turn_count > 60):
-            #     move = self.ab.make_move(self.board, self.colour, 3)
-            # else:
-            #     move = self.resistance.make_move(self.board, self.colour)
-
+            # accumulate turn time
+            self.turn_time = perf_counter() - start_time
 
         # send move
         self.s.sendall(bytes(f"{move[0]},{move[1]}\n", "utf-8"))
