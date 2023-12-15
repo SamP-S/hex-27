@@ -8,23 +8,17 @@ class AlphaBeta():
         using DFS for checking win conditions
     """
 
-    DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (-1, 1), (1, -1)]
-
-    def __init__(self, board_size=11, eval_func=1):
+    def __init__(self, board_size=11):
+        """ Initialisation function that sets board_size and a default evaluation function """
         self._board_size = board_size
-        if eval_func == 0:
-            self.evaluate_board = self.flat_board_evaluation
-        elif eval_func == 1:
-            self.evaluate_board = self.random_board_evaluation
-        else:
-            #print("ERROR: NO EVAL FUNCTION")
-            pass
+        self.evaluate_board = self.random_board_evaluation
 
 
-    def make_move(self, board, player, depth=2):
-        """ Makes a move according to Wolve's preferences
-        """
-
+    def make_move(self, board, player, eval_fn, depth=2):
+        """ Runs the Alpha Beta min max pruning using eval_fn to evaluate board states
+            upto depth """
+        # set this runs functions
+        self.evaluate_board = eval_fn
         self.node_count = 0
         start_time = perf_counter()
 
@@ -32,10 +26,7 @@ class AlphaBeta():
         val, move = self.alpha_beta(deepcopy(board), choices, player, depth)
 
         #print(f"ab finish: val={val}; move={move}; nodes={self.node_count} time={perf_counter() - start_time}")
-
         return move
-
-    
 
     def alpha_beta(self, board, choices, player, depth, alpha=-1000.0, beta=1000.0):
         """ Using min-max with alpha beta pruning
@@ -46,6 +37,8 @@ class AlphaBeta():
         best_move = (-1, -1)
         self.node_count += 1
 
+        # return win state or board evaluation
+        # if no more possible moves or at max depth
         if depth == 0 or len(choices) == 0:
             win = BoardSupport.check_winner(deepcopy(board))
             if win == 0:
@@ -54,42 +47,51 @@ class AlphaBeta():
 
         # maximising
         if player == "R":
+            # set lower bound
             best_val = -10000
+            # iterate over all empty board positions
             for i, choice in enumerate(choices):
+                # copy board and moves to prevent overwrite during function
                 sim_board = deepcopy(board)
                 sim_board[choice[0]][choice[1]] = player
                 sim_choices = deepcopy(choices)
                 move = sim_choices.pop(i)
+                # call next depth
                 val, next_move = self.alpha_beta(sim_board, sim_choices, "B", depth-1, alpha, beta)
+                # if highest value, store
                 if val > best_val:
                     best_move = move
                     best_val = val
                     alpha = val
                 if alpha >= beta:
                     break
+            # return highest found
             return best_val, best_move
 
         # minimising
         else:
+            # set upper bound
             best_val = 10000
+            # iterate over all empty board posisitions
             for i, choice in enumerate(choices):
+                # copy board and moves to prevent overwrite during function
                 sim_board = deepcopy(board)
                 sim_board[choice[0]][choice[1]] = player
                 sim_choices = deepcopy(choices)
                 move = sim_choices.pop(i)
+                # call next depth
                 val, next_move  = self.alpha_beta(sim_board, sim_choices, "R", depth-1, alpha, beta)
+                # if lowest value, store
                 if val < best_val:
                     best_move = move
                     best_val = val
                     beta = val
                 if alpha >= beta:
                     break
+            # return lowest found
             return best_val, best_move
 
-    def flat_board_evaluation(self, board, player):
-        """ return value of current board according to player as float """
-        return 0.5
-        
+    # simple random board evaluation for testing
     def random_board_evaluation(self, board, player):
         """ return value of current board according to player as float """
         return random()

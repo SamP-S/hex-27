@@ -14,16 +14,6 @@ class Resistance():
         """ pass in board size """
 
         self._board_size = board_size
-        
-    def make_move(self, board, player):
-        """Make a move according to resistance conductivity """
-
-        start_time = perf_counter()
-        conductivity = self.score(deepcopy(board), player)
-        move = np.unravel_index(conductivity.argmax(), conductivity.shape)
-        print(f"R: move={move}; conductivity={conductivity.shape}; time={perf_counter() - start_time}")
-        return move
-
 
     ### RESITSTANCE SYSTEMS
 
@@ -72,16 +62,7 @@ class Resistance():
         """ Calculate the resistance heuristic of the board over empty nodes
         """
         
-        ### TECHNICALLY UNNECESSARY AS THE ENGINE WILL TELL US IF WIN
-        # # win validation
-        # win = self.check_winner(board)
-        # if (win == 1):
-        #     return np.zeros((len(board), len(board))), float("inf")
-        # elif (win == -1):
-        #     return np.zeros((len(board), len(board))), 0
-        
         # create index dictionaries to look up
-
         empty = BoardSupport.get_empty(board)
         index_to_location = empty
         num_empty = len(empty)
@@ -91,10 +72,10 @@ class Resistance():
         # (zero except for source and dest connected nodes)
         I = np.zeros(num_empty)
 
-        # conductance matrix such that G * V = I
+        # conductance matrix
+        # conductance = 1/R
+        # V = I x R
         G = np.zeros((num_empty, num_empty))
-
-        # print(f"shapes: I={I.shape}; G={G.shape}")
 
         checked = np.zeros((len(board), len(board)), dtype=bool)
 
@@ -167,140 +148,73 @@ class Resistance():
                 for i, elem in enumerate(row):
                     f.write(str(abs(int(elem))))
                 f.write("\n")
-
-            # print(I)
-            # print(G)
-            #voltage at each cell
+            
+            # calculate voltage matrix
             try:
-                V = np.linalg.solve(G,I)
-            #slightly hacky fix for rare case of isolated empty cells
-            #happens rarely and fix should be fine but could improve
-            except np.linalg.linalg.LinAlgError:
-                V = np.linalg.lstsq(G,I)[0]
+                V_vec = np.linalg.solve(G,I)
+            except Exception:
+                return [], 0
             
             f.write("\nV:\n")
-            for idx, v in enumerate(V):
+            for idx, v in enumerate(V_vec):
                 f.write(f"{idx}\t:\t{index_to_location[idx]}\t= {v}\n")
-            
 
-        V_board = np.zeros((len(board), len(board)))
-        for i in range(num_empty):
-            V_board[index_to_location[i]] = V[i]
+        # current passing through each cell
+        I_board = np.zeros((len(board), len(board)))
 
-        #current passing through each cell
-        Il = np.zeros((len(board), len(board)))
-        #conductance from source to dest
+        # conductance from source to dest
         C = 0
 
+        # iterate through voltage evtor to build current as board matrix
+        # and conductance total from source to sink
         for i in range(num_empty):
             if index_to_location[i] in source_connected:
-                Il[index_to_location[i]] += abs(V[i] - 1)/2
+                I_board[index_to_location[i]] += abs(V_vec[i] - 1) / 2
             if index_to_location[i] in dest_connected:
-                Il[index_to_location[i]] += abs(V[i])/2
+                I_board[index_to_location[i]] += abs(V_vec[i]) / 2
             for j in range(num_empty):
                 if(i!=j and G[i,j] != 0):
-                    Il[index_to_location[i]] += abs(G[i,j] * (V[i] - V[j]))/2
+                    I_board[index_to_location[i]] += abs(G[i,j] * (V_vec[i] - V_vec[j])) / 2
                     if(index_to_location[i] in source_connected and
                     index_to_location[j] not in source_connected):
-                        C+=-G[i,j]*(V[i] - V[j])
-
-        # print(Il)
-        return Il, C
-
-    def score(self, board, player):
-        # Q is dictionary
-        Q = {}
-        #filled_fraction = (boardsize**2-num_empty+1)/boardsize**2
+                        C += -G[i,j] * (V_vec[i] - V_vec[j])
+        return I_board, C
+    
+    # pass evaluate function to AB to evaluate board positions then chose best move
+    def evaluate_board(self, board, player):
+        sim_board = deepcopy(board)
 
         # main matrices to calculate
         # I = current flowing through each connection of empty cell
         # C = total conductance from side to side attempting to join
-        I1, C1 = self.resistance(board, player)
-        I2, C2 = self.resistance(board, self.opp_player(player))
+        I1, C1 = self.resistance(sim_board, player)
+        I2, C2 = self.resistance(sim_board, BoardSupport.opp_player(player))
 
-        # print(f"C1={C1}; C2={C2}")
-
-        # layers of colour with paddding
-        # print(f"I1={I1.shape}; C1={C1}")
-        # print(f"I2={I2.shape}; C2={C2}")
-
-        empty = BoardSupport.get_empty(board)
-        for i, coord in enumerate(empty):
-
-            # # THIS IS AN APPROXIMATION OF THE CURRENT OF THE
-            # # NEW BOARD IF CELL IS TAKEN AS THE MOVE
-            # #this makes some sense as an approximation of
-            # #the conductance of the next state
-            # C1_prime = C1 + I1[cell]**2/(3*(1-I1[cell]))
-            # C2_prime = max(0,C2 - I2[cell])
-            sim_board = deepcopy(board)
-            sim_board[coord[0]][coord[1]] = player
-
-            I1_prime, C1_prime = self.resistance(sim_board, player)
-            I2_prime, C2_prime = self.resistance(sim_board, self.opp_player(player))
-
-            # print(f"C1_prime={C1_prime}; C2_prime={C2_prime}")
-
-            # fill Q dictionary with estimate conductivity values
-            # for board if cell take as move
-            if(C1_prime>C2_prime):
-                Q[coord] = min(1,max(-1,1 - C2_prime/C1_prime))
-            else:
-                Q[coord] = min(1,max(-1,C1_prime/C2_prime - 1))
-
-        # create matrix of -1s of board size
-        output = -1 * np.ones((len(board), len(board)))
-
-        # iterate through Q dictionary
-        # fill output matrix with board conductivity if that cell is selected
-        # HIGHER is better
-        for coord, value in Q.items():
-            output[coord[0]][coord[1]] = value
-        # return new matrix of values
-        return output
-
-    def opp_player(self, player):
-        """Returns the char representation of the colour opposite to the
-        current one.
-        """
-        
-        if player == "R":
-            return "B"
-        elif player == "B":
-            return "R"
-        else:
-            return "None"
+        # returns ratio of conductivity
+        # higher is better
+        return C1 / C2
 
 
 if (__name__ == "__main__"):
-    print("Resistance Testing")
+    # print("Resistance Testing")
     
-    def opp_player(p):
-        return "B" if p == "R" else "R"
-
-    def print_board(b):
-        for j, row in enumerate(b):
-            print(" "*j, end="")
-            print(" ".join(row))
+    # def print_board(b):
+    #     for j, row in enumerate(b):
+    #         print(" "*j, end="")
+    #         print(" ".join(row))
 
     board_size = 5
     player = "R"
     r = Resistance(board_size)
     board = BoardSupport.create_board(board_size)
     empty = BoardSupport.get_empty(board)
-    r.resistance(board, player)
 
-    while True:
-        conductivity = r.score(deepcopy(board), player)
-        move = np.unravel_index(conductivity.argmax(), conductivity.shape)
-        print(f"move={move}; value={conductivity[move[0]][move[1]]}")
-        board[move[0]][move[1]] = player
-
-        print("Board")
-        print_board(board)
-        print("Outputs")
-        print(conductivity)
-        input("Press Enter...")
-
-        player = opp_player(player)
+    eval = r.evaluate_board(deepcopy(board), player)
+    print(eval)
+    
+    # print(f"Total conductivity={conductivity}")
+    # print("Board")
+    # print_board(board)
+    # print("Currents")
+    # print(I)
 

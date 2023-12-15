@@ -3,9 +3,10 @@ import sys
 
 class BoardSupport():
     """ This class describes some support functions for frequent operations
-        involving collecting coordinate lists
+        involving the board and coordinates
     """
 
+    # all possible neighbouring directions as coordinates of (dx, dy)
     DIRECTIONS = [(1, 0), (-1, 0), (0, 1), (0, -1), (-1, 1), (1, -1)]
 
     @staticmethod
@@ -21,7 +22,7 @@ class BoardSupport():
             
     @staticmethod
     def get_empty(board):
-        """ Creates list of coordinates of all unclaimed cells """
+        """ Creates list of coordinates of all unclaimed/empty cells """
         coords = []
         for i in range(len(board)):
             for j in range(len(board)):
@@ -31,7 +32,7 @@ class BoardSupport():
     
     @staticmethod
     def create_board(board_size):
-        """ Creates new empty board of board_size x board_size """
+        """ Creates new empty board of (board_size x board_size) """
         return [["0"]*board_size for i in range(board_size)]
     
     @staticmethod
@@ -84,28 +85,34 @@ class BoardSupport():
 
         board_size = len(board)
         end_idx = board_size - 1
-        empty_line = ["0"]*board_size
         
+        # used for static analsyis optimisation
+        empty_line = ["0"]*board_size
+        skip_horizontal = False
+        skip_vertical = False
+
         # static analysis for speed
         for i in range(board_size):
             if board[i] == empty_line:
-                return 0
+                skip_horizontal = True
+                break
 
-        # iterate over top row to start dfs search
-        for i in range(board_size):
-            front, back = BoardSupport.dfs(deepcopy(board), "R", (i, 0), False, False)
-            if board[i][0] == 'R' and front and back:
-                return 1
+        if not (skip_horizontal):
+            # iterate over top row to start dfs search
+            for i in range(board_size):
+                front, back = BoardSupport.dfs(deepcopy(board), "R", (i, 0), False, False)
+                if board[i][0] == 'R' and front and back:
+                    return 1
         
         # build columns as cant just grab like rows
-        for i in range(1, end_idx - 1):
-            test_line = [row[i] for row in board]
+        for j in range(0, end_idx):
+            test_line = [row[j] for row in board]
             if test_line == empty_line:
-                return 0
-        front_line = [row[0] for row in board]
-        back_line = [row[end_idx] for row in board]
+                skip_vertical = True
+                break
+
         # static analysis to optimise performance
-        if front_line != empty_line and back_line != empty_line:
+        if not (skip_vertical):
             #  iterate over left column to start dfs search
             for j in range(board_size):
                 front, back = BoardSupport.dfs(deepcopy(board), "B", (0, j), False, False)
@@ -125,6 +132,7 @@ class BoardSupport():
     
     @staticmethod
     def opp_player(player):
+        """ Return opposite player to player """
         if player == "R":
             return "B"
         else:
