@@ -1,7 +1,7 @@
 from random import random
 from time import perf_counter
 from copy import deepcopy
-from BoardSupport import Coordinates
+from BoardSupport import BoardSupport
 
 class AlphaBeta():
     """ This class contains the functions for Min Max Alpha Beta Pruning
@@ -27,64 +27,14 @@ class AlphaBeta():
         self.node_count = 0
         start_time = perf_counter()
 
-        choices = Coordinates.get_empty(board)
+        choices = BoardSupport.get_empty(board)
         val, move = self.alpha_beta(deepcopy(board), choices, player, depth)
 
         print(f"ab finish: val={val}; move={move}; nodes={self.node_count} time={perf_counter() - start_time}")
 
         return move
 
-    def dfs(self, board, player, i, j, front, back):
-        """ Depth First Search for win checking 
-            Red top->bottom
-            Blue left->right """
-        # print(f"dfs: i={i}; j={j}; board={board}")
-
-        # validate the coordinates to check
-        if i < 0 or i >= self._board_size or j < 0 or j >= self._board_size or board[i][j] != player:
-            return front, back
-
-        # success if at vertical edges for Blue
-        if (i == 0) and player == "B":
-            front = True
-        if (i == self._board_size - 1 and player == "B"):
-            back = True
-
-        # success if at horizontal edges for Red
-        if j == 0 and player == "R":
-            front = True
-        if j == self._board_size - 1 and player == "R":
-            back = True
-
-        # update board to mark where we've been
-        board[i][j] = "#"
-        # iterate through checking neighbours
-        for dx, dy in self.DIRECTIONS:
-            # check neighbours
-            next_front, next_back = self.dfs(board, player, i + dx, j + dy, front, back)
-            if next_front and next_back:
-                return True, True
-
-        # no neighbours or connections to edges
-        return front, back
-
-    def check_winner(self, board):
-        """ Checks if there is a connection from one side of the board to the other
-            Red top->bottom
-            Blue left->right
-            Return 1 for Red win, -1 for Blue win, 0 for no winner """
-
-        # iterate over top row to start dfs search
-        for i in range(self._board_size):
-            front, back = self.dfs(deepcopy(board), "R", i, 0, False, False)
-            if board[i][0] == 'R' and front and back:
-                return 1
-        #  iterate over left column to start dfs search
-        for j in range(self._board_size):
-            front, back = self.dfs(deepcopy(board), "B", 0, j, False, False)
-            if board[0][j] == 'B' and front and back:
-                return -1
-        return 0
+    
 
     def alpha_beta(self, board, choices, player, depth, alpha=-1000.0, beta=1000.0):
         """ Using min-max with alpha beta pruning
@@ -96,7 +46,7 @@ class AlphaBeta():
         self.node_count += 1
 
         if depth == 0 or len(choices) == 0:
-            win = self.check_winner(deepcopy(board))
+            win = BoardSupport.check_winner(deepcopy(board))
             if win == 0:
                 return self.evaluate_board(board, player), best_move
             return win, best_move

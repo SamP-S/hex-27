@@ -3,6 +3,7 @@ from random import choice
 from time import sleep
 from AlphaBeta import AlphaBeta
 from Resistance import Resistance
+from BoardSupport import BoardSupport
 
 class ControlAgent():
     """This class describes the default Hex agent. It will randomly send a
@@ -48,7 +49,7 @@ class ControlAgent():
             if s[0] == "START":
                 self.board_size = int(s[1])
                 self.colour = s[2]
-                self.board = [["0"]*self.board_size for i in range(self.board_size)]
+                self.board = BoardSupport.create_board(self.board_size)
 
                 if self.colour == "R":
                     self.make_move()

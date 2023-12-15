@@ -3,7 +3,7 @@ from random import choice
 from time import sleep, perf_counter
 from copy import deepcopy
 import numpy as np
-from BoardSupport import Coordinates
+from BoardSupport import BoardSupport
 import sys
 
 
@@ -16,8 +16,7 @@ class Resistance():
         self._board_size = board_size
         
     def make_move(self, board, player):
-        """Make a moev according to resistance conductivity
-        """
+        """Make a move according to resistance conductivity """
 
         start_time = perf_counter()
         conductivity = self.score(deepcopy(board), player)
@@ -35,7 +34,7 @@ class Resistance():
         checked[coord] = True
         connected = set()
         # iterate over neighbouring cells
-        for coord in Coordinates.get_neighbours(board, coord):
+        for coord in BoardSupport.get_neighbours(board, coord):
             if(not checked[coord]):
                 # if neighbour is same colour and then combine that neighbours connected set
                 if(board[coord[0]][coord[1]] == player):
@@ -52,7 +51,7 @@ class Resistance():
         # iterate over all empty cells
         for cell in empty:
             # neighbors of cell
-            for coord in Coordinates.get_neighbours(board, cell):
+            for coord in BoardSupport.get_neighbours(board, cell):
                 # if not already checked
                 if(not checked[coord]):
                     # check if cell is colour
@@ -83,7 +82,7 @@ class Resistance():
         
         # create index dictionaries to look up
 
-        empty = Coordinates.get_empty(board)
+        empty = BoardSupport.get_empty(board)
         index_to_location = empty
         num_empty = len(empty)
         location_to_index = {index_to_location[i]:i for i in range(len(index_to_location))}
@@ -225,7 +224,7 @@ class Resistance():
         # print(f"I1={I1.shape}; C1={C1}")
         # print(f"I2={I2.shape}; C2={C2}")
 
-        empty = Coordinates.get_empty(board)
+        empty = BoardSupport.get_empty(board)
         for i, coord in enumerate(empty):
 
             # # THIS IS AN APPROXIMATION OF THE CURRENT OF THE
@@ -278,5 +277,5 @@ if (__name__ == "__main__"):
     board_size = 11
     r = Resistance(board_size)
     board = [["0"]*board_size for i in range(board_size)]
-    empty = Coordinates.get_empty(board)
+    empty = BoardSupport.get_empty(board)
     r.resistance(board, "R")
