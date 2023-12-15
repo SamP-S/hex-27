@@ -76,9 +76,9 @@ class Resistance():
         # conductance = 1/R
         # V = I x R
         G = np.zeros((num_empty, num_empty))
-
         checked = np.zeros((len(board), len(board)), dtype=bool)
 
+        # get set of coordinates that are touching left or top respective of player (+V)
         source_connected = set()
         if player == "R":
             for j in range(len(board)):
@@ -94,70 +94,49 @@ class Resistance():
                     source_connected.add(coord)
                 elif board[coord[0]][coord[1]] == "R":
                     source_connected = source_connected | self.fill_connect(board, coord, player, checked)
-        
-        with open("./docs/kirchhoff.txt", "w") as f:
-            f.write("source_connected:\n")
-            # print(f"source_connected={source_connected}")
-            for n in source_connected:
-                j = location_to_index[n]
-                I[j] += 1
-                G[j,j] += 1
-                f.write(str(n)+"\n")
-                
-            dest_connected = set()
-            if player == "R":
-                for j in range(len(board)):
-                    coord = ((len(board)-1, j))
-                    if board[coord[0]][coord[1]] == "0":
-                        dest_connected.add(coord)
-                    elif board[coord[0]][coord[1]] == "B":
-                        dest_connected = dest_connected | self.fill_connect(board, coord, player, checked)
-            else:
-                for i in range(len(board)):
-                    coord = (i, len(board)-1)
-                    if board[coord[0]][coord[1]] == "0":
-                        dest_connected.add(coord)
-                    elif board[coord[0]][coord[1]] == "R":
-                        dest_connected = dest_connected | self.fill_connect(board, coord, player, checked)
-                
-            f.write("\ndest_connected:\n")
-            # print(f"dest_connected={dest_connected}")
-            for n in dest_connected:
-                j = location_to_index[n]
-                G[j,j] +=1
-                f.write(str(n)+"\n")
 
-            f.write("\nadjacency:\n")
-            adjacency = self.get_connections(board, player, index_to_location, checked)
-            # print(f"len={len(adjacency.keys())}; adjacency={adjacency.keys()}")
-            for c1 in adjacency:
-                j=location_to_index[c1]
-                f.write(str(c1) + "\n")
-                for c2 in adjacency[c1]:
-                    i=location_to_index[c2]
-                    G[i,j] -= 1
-                    G[i,i] += 1
-                    f.write("\t"+str(c2)+"\n")
+        # adjust matrices to sources
+        for n in source_connected:
+            j = location_to_index[n]
+            I[j] += 1
+            G[j,j] += 1
             
-            f.write("\nI:\n")
-            for idx, i in enumerate(I):
-                f.write(f"{idx}\t:\t{index_to_location[idx]}\t= {i}\n")
+        # get set of coordinates that are touching bottom or right respective of player (GND)
+        dest_connected = set()
+        if player == "R":
+            for j in range(len(board)):
+                coord = ((len(board)-1, j))
+                if board[coord[0]][coord[1]] == "0":
+                    dest_connected.add(coord)
+                elif board[coord[0]][coord[1]] == "B":
+                    dest_connected = dest_connected | self.fill_connect(board, coord, player, checked)
+        else:
+            for i in range(len(board)):
+                coord = (i, len(board)-1)
+                if board[coord[0]][coord[1]] == "0":
+                    dest_connected.add(coord)
+                elif board[coord[0]][coord[1]] == "R":
+                    dest_connected = dest_connected | self.fill_connect(board, coord, player, checked)
+        
+        # adjust matrices to sources
+        for n in dest_connected:
+            j = location_to_index[n]
+            G[j,j] +=1
+
+        # get all adjacent empty board positions as an adjaceny matrix and update representative conductance matrix
+        adjacency = self.get_connections(board, player, index_to_location, checked)
+        for c1 in adjacency:
+            j=location_to_index[c1]
+            for c2 in adjacency[c1]:
+                i=location_to_index[c2]
+                G[i,j] -= 1
+                G[i,i] += 1
             
-            f.write("\nG:\n")
-            for j, row in enumerate(G):
-                for i, elem in enumerate(row):
-                    f.write(str(abs(int(elem))))
-                f.write("\n")
-            
-            # calculate voltage matrix
-            try:
-                V_vec = np.linalg.solve(G,I)
-            except Exception:
-                return [], 0
-            
-            f.write("\nV:\n")
-            for idx, v in enumerate(V_vec):
-                f.write(f"{idx}\t:\t{index_to_location[idx]}\t= {v}\n")
+        # calculate voltage matrix
+        try:
+            V_vec = np.linalg.solve(G,I)
+        except Exception:
+            return [], 0
 
         # current passing through each cell
         I_board = np.zeros((len(board), len(board)))
