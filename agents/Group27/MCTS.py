@@ -11,11 +11,13 @@ class Node:
 
     def __init__(self, move, player, parent, layer): 
         # move is from parent to node
-        self.move, self.player, self.parent, self.layer= move, player, parent, layer
+        self.move, self.player, self.parent, self.layer = move, player, parent, layer
         self.children = []
 
-        # set initial 50% win rate to prevent unvisite nodes being discarded
-        self.wins, self.visits = 1, 2
+        # # set initial 50% win rate to prevent unvisite nodes being discarded
+        # self.wins, self.visits = 1, 2
+        self.wins, self.visits = 0, 0
+
 
     # get recommended exploration constant from lectures
     def ucb_score(self, exploration_constant=1.5):
@@ -23,7 +25,7 @@ class Node:
             return float('inf')
 
         exploitation = self.wins / self.visits
-        exploration = exploration_constant * math.sqrt(math.log(self.parent.visits) / self.visits)
+        exploration = exploration_constant * math.sqrt(math.log(self.parent.visits + 1) / self.visits)
         return exploitation + exploration
 
     def update(self, is_win):
@@ -57,20 +59,16 @@ class Node:
 
 class MCTS:
 
-    def __init__(self, board_size, max_time=5):
-        self.max_time = max_time
+    def __init__(self, board_size):
         self.board_size = board_size
     
     def selection(self, board, n):
-        """ Recursive selection, updates board with given node """
-        if n.is_leaf():
-            return n
-        
-        n = Node.tree_policy_child(n)
-        board[n.move[0]][n.move[1]] = n.player
-        return self.selection(board, n)
+        """ Iterative selection, updates board with given node """
+        while not n.is_leaf():
+            n = Node.tree_policy_child(n)
+            board[n.move[0]][n.move[1]] = n.player
+        return n
 
-    
     def expansion(self, board, n):
         if BoardSupport.check_winner(board) == 0:
             empty = BoardSupport.get_empty(board)
@@ -78,11 +76,13 @@ class MCTS:
 
             # for each empty board create node as child
             # add to parent n
-            n.wins += len(empty)
-            n.visits += len(empty) * 2
+            # n.wins += len(empty)
+            # n.visits += len(empty) * 2
             for move in empty:
                 new_child = Node(move, opp_player, n, n.layer + 1)
                 n.children.append(new_child)
+        # else:
+        #     print("REACHED TERMINAL")
 
     def simulate_move(self, board, moves, player):
         """ Randomise moves and play all in new order then check winner """
@@ -101,7 +101,8 @@ class MCTS:
                 board[move[0]][move[1]] = player
             else:
                 board[move[0]][move[1]] = opp_player
-        return BoardSupport.check_winner(board)
+        win_state = BoardSupport.check_winner(board)
+        return win_state
 
 
     def simulation(self, board, n):
@@ -131,30 +132,25 @@ class MCTS:
                 best_wins = child.wins
                 best_child = child
                 
-        print(f"best: wins={best_child.wins}; win_rate={best_child.wins/best_child.visits}; move={best_child.move}")
+        print(f"best: wins={best_child.wins}/{best_child.visits}; win_rate={best_child.wins/best_child.visits}; move={best_child.move}; iterations={self.iterations}")
         # self.root_node.children = [best_child]
         return best_child.move
     
-    def make_move(self, board, player, max_time=3):
+    def make_move(self, board, player, max_time=5):
         safe_board = deepcopy(board)
         start_time = perf_counter()
-        iterations = 0
+        self.iterations = 0
 
         self.root_node = Node(None, None, None, 0)
         self.expansion(safe_board, self.root_node)
-        # print(f"time={perf_counter() - start_time}; iter={iterations}")
-        # print(f"time_flag={(max_time < int(perf_counter() - start_time))}")
-        # print(f"iter_flag={iterations < max_iterations}")
-        # print(f"iter={iterations}; max_iter={max_iterations}")
         while ((perf_counter() - start_time)) < max_time:
             pre_time = perf_counter()
-            iterations += 1
+            self.iterations += 1
             # print(f"i={iterations}")
             n, b = self.root_node, deepcopy(safe_board)
 
             copy_time = perf_counter()
-            # print()
-            # print(f"Copy Time: {(copy_time - pre_time):.8f}")
+            # print(f"\nCopy Time: {(copy_time - pre_time):.8f}")
             # print(f"Root {len(n.children)}; Layer={n.layer}")
             # print(f"Board: {b}")
 
@@ -191,12 +187,11 @@ class MCTS:
             self.backpropagation(is_win, n)
             prop_time = perf_counter()
             # print(f"Simulation Time: {(prop_time - sim_time):.8f}")
-        print(f"Iterations={iterations}")
         return self.best_move()
 
 if __name__ == "__main__":
     # Initialize MCTS with time and iteration limits
-    mcts = MCTS(max_time=5)
+    mcts = MCTS(11)
 
     # # test simulation
     # board = BoardSupport.create_board(11)
