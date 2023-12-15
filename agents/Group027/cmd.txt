@@ -1,1 +1,1 @@
-python3 agents/Group027/ControlAgent.py
+python3 ControlAgent.py
