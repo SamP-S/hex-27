@@ -4,6 +4,7 @@ from time import sleep, perf_counter
 from copy import deepcopy
 import numpy as np
 from BoardSupport import Coordinates
+import sys
 
 
 class Resistance():
@@ -68,7 +69,7 @@ class Resistance():
                         connections[cell].add(coord)
         return connections
 
-    def resistance(self, board, empty, player):
+    def resistance(self, board, player):
         """ Calculate the resistance heuristic of the board over empty nodes
         """
         
@@ -81,6 +82,8 @@ class Resistance():
         #     return np.zeros((len(board), len(board))), 0
         
         # create index dictionaries to look up
+
+        empty = Coordinates.get_empty(board)
         index_to_location = empty
         num_empty = len(empty)
         location_to_index = {index_to_location[i]:i for i in range(len(index_to_location))}
@@ -89,7 +92,7 @@ class Resistance():
         # (zero except for source and dest connected nodes)
         I = np.zeros(num_empty)
 
-        # conductance matrix such that G*V = I
+        # conductance matrix such that G * V = I
         G = np.zeros((num_empty, num_empty))
 
         # print(f"shapes: I={I.shape}; G={G.shape}")
@@ -112,52 +115,74 @@ class Resistance():
                 elif board[coord[0]][coord[1]] == "R":
                     source_connected = source_connected | self.fill_connect(board, coord, player, checked)
         
-        # print(f"source_connected={source_connected}")
-        for n in source_connected:
-            j = location_to_index[n]
-            I[j] += 1
-            G[j,j] += 1
-            
-        dest_connected = set()
-        if player == "R":
-            for j in range(len(board)):
-                coord = ((len(board)-1, j))
-                if board[coord[0]][coord[1]] == "0":
-                    dest_connected.add(coord)
-                elif board[coord[0]][coord[1]] == "B":
-                    dest_connected = dest_connected | self.fill_connect(board, coord, player, checked)
-        else:
-            for i in range(len(board)):
-                coord = (i, len(board)-1)
-                if board[coord[0]][coord[1]] == "0":
-                    dest_connected.add(coord)
-                elif board[coord[0]][coord[1]] == "R":
-                    dest_connected = dest_connected | self.fill_connect(board, coord, player, checked)
-            
-        
-        # print(f"dest_connected={dest_connected}")
-        for n in dest_connected:
-            j = location_to_index[n]
-            G[j,j] +=1
+        with open("shit.txt", "w") as f:
+            f.write("source_connected:\n")
+            # print(f"source_connected={source_connected}")
+            for n in source_connected:
+                j = location_to_index[n]
+                I[j] += 1
+                G[j,j] += 1
+                f.write(str(n)+"\n")
+                
+            dest_connected = set()
+            if player == "R":
+                for j in range(len(board)):
+                    coord = ((len(board)-1, j))
+                    if board[coord[0]][coord[1]] == "0":
+                        dest_connected.add(coord)
+                    elif board[coord[0]][coord[1]] == "B":
+                        dest_connected = dest_connected | self.fill_connect(board, coord, player, checked)
+            else:
+                for i in range(len(board)):
+                    coord = (i, len(board)-1)
+                    if board[coord[0]][coord[1]] == "0":
+                        dest_connected.add(coord)
+                    elif board[coord[0]][coord[1]] == "R":
+                        dest_connected = dest_connected | self.fill_connect(board, coord, player, checked)
+                
+            f.write("\ndest_connected:\n")
+            # print(f"dest_connected={dest_connected}")
+            for n in dest_connected:
+                j = location_to_index[n]
+                G[j,j] +=1
+                f.write(str(n)+"\n")
 
-        adjacency = self.get_connections(board, player, index_to_location, checked)
-        # print(f"len={len(adjacency.keys())}; adjacency={adjacency.keys()}")
-        for c1 in adjacency:
-            j=location_to_index[c1]
-            for c2 in adjacency[c1]:
-                i=location_to_index[c2]
-                G[i,j] -= 1
-                G[i,i] += 1
+            f.write("\nadjacency:\n")
+            adjacency = self.get_connections(board, player, index_to_location, checked)
+            # print(f"len={len(adjacency.keys())}; adjacency={adjacency.keys()}")
+            for c1 in adjacency:
+                j=location_to_index[c1]
+                f.write(str(c1) + "\n")
+                for c2 in adjacency[c1]:
+                    i=location_to_index[c2]
+                    G[i,j] -= 1
+                    G[i,i] += 1
+                    f.write("\t"+str(c2)+"\n")
+            
+            f.write("\nI:\n")
+            for idx, i in enumerate(I):
+                f.write(f"{idx}\t:\t{index_to_location[idx]}\t= {i}\n")
+            
+            f.write("\nG:\n")
+            for j, row in enumerate(G):
+                for i, elem in enumerate(row):
+                    f.write(str(abs(int(elem))))
+                f.write("\n")
 
-        # print(I)
-        # print(G)
-        #voltage at each cell
-        try:
-            V = np.linalg.solve(G,I)
-        #slightly hacky fix for rare case of isolated empty cells
-        #happens rarely and fix should be fine but could improve
-        except np.linalg.linalg.LinAlgError:
-            V = np.linalg.lstsq(G,I)[0]
+            # print(I)
+            # print(G)
+            #voltage at each cell
+            try:
+                V = np.linalg.solve(G,I)
+            #slightly hacky fix for rare case of isolated empty cells
+            #happens rarely and fix should be fine but could improve
+            except np.linalg.linalg.LinAlgError:
+                V = np.linalg.lstsq(G,I)[0]
+            
+            f.write("\nV:\n")
+            for idx, v in enumerate(V):
+                f.write(f"{idx}\t:\t{index_to_location[idx]}\t= {v}\n")
+            
 
         V_board = np.zeros((len(board), len(board)))
         for i in range(num_empty):
@@ -175,7 +200,7 @@ class Resistance():
                 Il[index_to_location[i]] += abs(V[i])/2
             for j in range(num_empty):
                 if(i!=j and G[i,j] != 0):
-                    Il[index_to_location[i]] += abs(G[i,j]*(V[i] - V[j]))/2
+                    Il[index_to_location[i]] += abs(G[i,j] * (V[i] - V[j]))/2
                     if(index_to_location[i] in source_connected and
                     index_to_location[j] not in source_connected):
                         C+=-G[i,j]*(V[i] - V[j])
@@ -186,14 +211,13 @@ class Resistance():
     def score(self, board, player):
         # Q is dictionary
         Q = {}
-        empty = Coordinates.get_empty(board)
         #filled_fraction = (boardsize**2-num_empty+1)/boardsize**2
 
         # main matrices to calculate
         # I = current flowing through each connection of empty cell
         # C = total conductance from side to side attempting to join
-        I1, C1 = self.resistance(board, empty, player)
-        I2, C2 = self.resistance(board, empty, self.opp_player(player))
+        I1, C1 = self.resistance(board, player)
+        I2, C2 = self.resistance(board, self.opp_player(player))
 
         # print(f"C1={C1}; C2={C2}")
 
@@ -212,11 +236,9 @@ class Resistance():
             # C2_prime = max(0,C2 - I2[cell])
             sim_board = deepcopy(board)
             sim_board[coord[0]][coord[1]] = player
-            sim_empty = deepcopy(empty)
-            sim_empty.pop(i)
 
-            I1_prime, C1_prime = self.resistance(sim_board, sim_empty, player)
-            I2_prime, C2_prime = self.resistance(sim_board, sim_empty, self.opp_player(player))
+            I1_prime, C1_prime = self.resistance(sim_board, player)
+            I2_prime, C2_prime = self.resistance(sim_board, self.opp_player(player))
 
             # print(f"C1_prime={C1_prime}; C2_prime={C2_prime}")
 
@@ -252,4 +274,9 @@ class Resistance():
 
 
 if (__name__ == "__main__"):
-    print("Resistance.py has no main")
+    print("Resistance Testing")
+    board_size = 11
+    r = Resistance(board_size)
+    board = [["0"]*board_size for i in range(board_size)]
+    empty = Coordinates.get_empty(board)
+    r.resistance(board, "R")
