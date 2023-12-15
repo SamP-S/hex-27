@@ -135,9 +135,10 @@ class ControlAgent():
                     # If mohex crashes then use Dijkstra
                     move = False
                 if move == False:
-                    #print("MOHEX CRASHED############################################")
+                    # print("MOHEX CRASHED############################################")
                     #input()
-                    move = choice(dijkstra_path)
+                    move = self.mcts.make_move(self.board, self.colour, max_time=5)
+                    # move = choice(dijkstra_path)
                     #print("DIJKSTRA", move)
 
             # if (self.turn_count > 60):

@@ -23,6 +23,7 @@ class MoHex():
         self._send_mohex_command("param_mohex lock_free 1")
         response = self._read_mohex_response()
         self._send_mohex_command("param_mohex ponder 0")
+        response = self._read_mohex_response()
         #print("Game start")
     
     def _terminate_subprocess(self):
@@ -104,14 +105,14 @@ class MoHex():
         mohex_colour = self.mohex_colour_map[colour][0]
         self._send_mohex_command(f"genmove {mohex_colour}")
         response = self._read_mohex_response()
-        #print("Response: ", response)
+        # print("Response: ", response)
         if response == 'timeout':
-            #print("Timeout")
+            # print("Timeout")
             return False
             # sys.exit()#############################
         
         # Send move to server
-        #print(f"RESPONSE: {response}")
+        # print(f"RESPONSE: {response}")
         move = self.separate_letter_and_number(response)
         move = self.mohex_to_hex_board(move[0], move[1])
         return move
