@@ -1,4 +1,5 @@
 from copy import deepcopy
+import sys
 
 class BoardSupport():
     """ This class describes some support functions for frequent operations
@@ -82,16 +83,34 @@ class BoardSupport():
             Return 1 for Red win, -1 for Blue win, 0 for no winner """
 
         board_size = len(board)
+        end_idx = board_size - 1
+        empty_line = ["0"]*board_size
+        
+        # static analysis for speed
+        for i in range(board_size):
+            if board[i] == empty_line:
+                return 0
+
         # iterate over top row to start dfs search
         for i in range(board_size):
             front, back = BoardSupport.dfs(deepcopy(board), "R", (i, 0), False, False)
             if board[i][0] == 'R' and front and back:
                 return 1
-        #  iterate over left column to start dfs search
-        for j in range(board_size):
-            front, back = BoardSupport.dfs(deepcopy(board), "B", (0, j), False, False)
-            if board[0][j] == 'B' and front and back:
-                return -1
+        
+        # build columns as cant just grab like rows
+        for i in range(1, end_idx - 1):
+            test_line = [row[i] for row in board]
+            if test_line == empty_line:
+                return 0
+        front_line = [row[0] for row in board]
+        back_line = [row[end_idx] for row in board]
+        # static analysis to optimise performance
+        if front_line != empty_line and back_line != empty_line:
+            #  iterate over left column to start dfs search
+            for j in range(board_size):
+                front, back = BoardSupport.dfs(deepcopy(board), "B", (0, j), False, False)
+                if board[0][j] == 'B' and front and back:
+                    return -1
         return 0
     
     @staticmethod
