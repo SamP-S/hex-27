@@ -6,6 +6,8 @@ from BoardSupport import BoardSupport
 import sys
 
 class Node:
+    """ Node data structure is for the tree in the MCTS implementation
+        No board data should be tied to the node itself """
 
     def __init__(self, move, player, parent, layer): 
         # move is from parent to node
@@ -34,10 +36,6 @@ class Node:
 
     def has_parent(self):
         return self.parent is not None
-    
-    @staticmethod
-    def terminal(board):
-        return (BoardSupport.check_winner(board) != 0)
     
     @staticmethod
     def tree_policy_child(node):
@@ -74,7 +72,7 @@ class MCTS:
 
     
     def expansion(self, board, n):
-        if not Node.terminal(board):
+        if BoardSupport.check_winner(board) == 0:
             empty = BoardSupport.get_empty(board)
             opp_player = BoardSupport.opp_player(n.player)
 
@@ -87,28 +85,24 @@ class MCTS:
                 n.children.append(new_child)
 
     def simulate_move(self, board, moves, player):
-        """ Recursively runs a simulation move. Pass moves and board for speed, must be deep copied before call """
+        """ Randomise moves and play all in new order then check winner """
 
         # catch if no moves sent
         if len(moves) == 0:
+            print("WORSE NO MOVES")
             moves = BoardSupport.get_empty(board)
         
-        # choose random move
-        move = random.choice(moves)
-        # print(f"sim move: {move}")
-        board[move[0]][move[1]] = player
-        moves.remove(move)
+        # shuffle moves
+        random.shuffle(moves)
+        opp_player = BoardSupport.opp_player(player)
 
-        win_state = BoardSupport.check_winner(board)
-        if win_state != 0:
-            # print("Final Board")
-            # for j, row in enumerate(board):
-            #     for i in range(j):
-            #         print("  ", end="")
-            #     print(row)
-            # print(f"Win State = {win_state}")
-            return win_state
-        return self.simulate_move(board, moves, BoardSupport.opp_player(player))
+        for i, move in enumerate(moves):
+            if i % 2 == 0:
+                board[move[0]][move[1]] = player
+            else:
+                board[move[0]][move[1]] = opp_player
+        return BoardSupport.check_winner(board)
+
 
     def simulation(self, board, n):
         """ Perform a simulation safely copying all necessary objects"""
@@ -117,9 +111,10 @@ class MCTS:
         sim_board = deepcopy(board)
         sim_player = BoardSupport.opp_player(n.player)
 
-        # get moves and catch if terminal node
+        # get moves and catch if no moves left
         sim_moves = BoardSupport.get_empty(sim_board)
         if len(sim_moves) == 0:
+            print("SIM MOVE == 0")
             return BoardSupport.check_winner(board)
         return self.simulate_move(sim_board, sim_moves, sim_player)
 
@@ -158,8 +153,8 @@ class MCTS:
             n, b = self.root_node, deepcopy(safe_board)
 
             copy_time = perf_counter()
-            print()
-            print(f"Copy Time: {(copy_time - pre_time):.8f}")
+            # print()
+            # print(f"Copy Time: {(copy_time - pre_time):.8f}")
             # print(f"Root {len(n.children)}; Layer={n.layer}")
             # print(f"Board: {b}")
 
@@ -167,27 +162,27 @@ class MCTS:
 
             n = self.selection(b, n)
             selection_time = perf_counter()
-            print(f"Selection Time: {(selection_time - copy_time):.8f}")
+            # print(f"Selection Time: {(selection_time - copy_time):.8f}")
             # print(f"Selection {len(n.children)}; Layer={n.layer}")
             # print(f"Board: {b}")
 
             # expand
             self.expansion(b, n)
             expansion_time = perf_counter()
-            print(f"Expansion Time: {(expansion_time - selection_time):.8f}")
+            # print(f"Expansion Time: {(expansion_time - selection_time):.8f}")
             # print(f"Expansion {len(n.children)}; Layer={n.layer}")
             # print(f"Board: {b}")
 
             # reselect after expansion
             n = self.selection(b, n)
             selection_again_time = perf_counter()
-            print(f"Selection2 Time: {(selection_again_time - expansion_time):.8f}")
+            # print(f"Selection2 Time: {(selection_again_time - expansion_time):.8f}")
             
             # simulate
             end_state = self.simulation(b, n)
 
             sim_time = perf_counter()
-            print(f"Simulation Time: {(sim_time - selection_again_time):.8f}")
+            # print(f"Simulation Time: {(sim_time - selection_again_time):.8f}")
 
             # check if end state is win
             is_win = BoardSupport.evaluate_is_win(end_state, player)
@@ -195,7 +190,7 @@ class MCTS:
             # propagate
             self.backpropagation(is_win, n)
             prop_time = perf_counter()
-            print(f"Simulation Time: {(prop_time - sim_time):.8f}")
+            # print(f"Simulation Time: {(prop_time - sim_time):.8f}")
         print(f"Iterations={iterations}")
         return self.best_move()
 
