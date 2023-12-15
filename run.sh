@@ -38,12 +38,12 @@ for ((j = 0; j < agent_count; j++)); do
     for ((i = 0; i < itr; i++)); do
         # echo $i
         x=($(python Hex.py "a=Electro;python agents/Group27/ControlAgent.py" $agent_cfg -v 2>/dev/null))
-        echo "${x[@]}"
+        echo "${x[-4]}"
         if [[ "${x[-4]}" == *"Electro"* ]]; then
             ((first_win++))
         fi
         y=($(python Hex.py $agent_cfg "a=Electro;python agents/Group27/ControlAgent.py" -v 2>/dev/null))
-        echo "${y[@]}"
+        echo "${y[-4]}"
         if [[ "${y[-4]}" == *"Electro"* ]]; then
             ((second_win++))
         fi
